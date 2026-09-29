@@ -28,15 +28,27 @@ def get_alerts():
         query += " ORDER BY CASE WHEN status = 'active' THEN 1 ELSE 2 END, created_at DESC;"
 
         alerts = db.execute_query(query, params)
+        for alert in alerts:
+            for field in ("created_at", "resolved_at"):
+                value = alert.get(field)
+                if hasattr(value, "isoformat"):
+                    alert[field] = value.isoformat()
 
         stats = db.execute_one("""
             SELECT 
                 COUNT(*) AS total,
-                SUM(CASE WHEN severity = 'critical' AND status != 'dismissed' THEN 1 ELSE 0 END) AS critical,
-                SUM(CASE WHEN severity = 'warning' AND status != 'dismissed' THEN 1 ELSE 0 END) AS warning,
-                SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) AS resolved
+                SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active,
+                SUM(CASE WHEN severity = 'critical' AND status = 'active' THEN 1 ELSE 0 END) AS critical,
+                SUM(CASE WHEN severity = 'warning' AND status = 'active' THEN 1 ELSE 0 END) AS warning,
+                SUM(CASE WHEN severity = 'info' AND status = 'active' THEN 1 ELSE 0 END) AS info,
+                SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) AS resolved,
+                SUM(CASE WHEN status = 'dismissed' THEN 1 ELSE 0 END) AS dismissed
             FROM alerts;
-        """)
+        """) or {}
+        stats = {
+            key: int(stats.get(key) or 0)
+            for key in ("total", "active", "critical", "warning", "info", "resolved", "dismissed")
+        }
 
         return jsonify({
             "success": True,
@@ -52,7 +64,7 @@ def dismiss_alert(alert_id):
     """Mark an alert as dismissed in MySQL."""
     try:
         res = db.execute_commit(
-            "UPDATE alerts SET status = 'dismissed' WHERE id = %s;",
+            "UPDATE alerts SET status = 'dismissed' WHERE id = %s AND status = 'active';",
             (alert_id,)
         )
         if res["affected_rows"] == 0:
@@ -70,7 +82,7 @@ def resolve_alert(alert_id):
     """Mark an alert as resolved in MySQL."""
     try:
         res = db.execute_commit(
-            "UPDATE alerts SET status = 'resolved', severity = 'resolved', resolved_at = CURRENT_TIMESTAMP WHERE id = %s;",
+            "UPDATE alerts SET status = 'resolved', resolved_at = CURRENT_TIMESTAMP WHERE id = %s AND status = 'active';",
             (alert_id,)
         )
         if res["affected_rows"] == 0:
@@ -93,6 +105,8 @@ def create_alert():
             return jsonify({"success": False, "error": "Title is required"}), 400
 
         severity = data.get("severity", "warning")
+        if severity not in ("critical", "warning", "info"):
+            return jsonify({"success": False, "error": "Severity must be critical, warning, or info"}), 400
         category = data.get("category", "General")
         location = data.get("location", "Campus")
         description = data.get("description", "")

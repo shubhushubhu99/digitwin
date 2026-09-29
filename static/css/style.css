@@ -4380,7 +4380,7 @@ nav {
 
 .alerts-page-stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 12px;
     margin-bottom: 14px;
 }
@@ -4479,6 +4479,11 @@ nav {
     background: #f8d4c9;
 }
 
+.info-status {
+    color: #456d8f;
+    background: #dce9f5;
+}
+
 .alert-action {
     border: none;
     background: #f0ebe2;
@@ -4498,6 +4503,10 @@ nav {
     color: #5e8f61;
     background: #dcebd9;
     cursor: default;
+}
+
+.alert-detail-actions .alert-action[hidden] {
+    display: none !important;
 }
 
 .alerts-empty {
@@ -6899,4 +6908,288 @@ body.settings-hide-timestamps .system-status small {
     .equipment-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .facility-session-row { align-items: flex-start; flex-direction: column; gap: 4px; }
     .facility-session-row strong { text-align: left; }
+}
+
+.alerts-page-stat.info strong { color: #557b9e; }
+
+.alert-detail-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.app-toast {
+    position: fixed;
+    z-index: 1000;
+    right: 22px;
+    bottom: 22px;
+    max-width: min(360px, calc(100vw - 32px));
+    padding: 12px 16px;
+    border: 1px solid #a6c6a1;
+    border-radius: 11px;
+    background: #f4fbf1;
+    color: #315d36;
+    box-shadow: var(--shadow);
+    font-size: 13px;
+}
+
+.app-toast.error {
+    border-color: #e5b7a8;
+    background: #fff5f1;
+    color: #8d3f30;
+}
+
+.app-toast[hidden] { display: none !important; }
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --background: #202824;
+    --card: #2c3530;
+    --green: #91b98e;
+    --dark-green: #a2c59f;
+    --peach: #d79a7e;
+    --orange: #e58a62;
+    --yellow: #d9ba68;
+    --blue: #86a9d1;
+    --dark-blue: #94b4d7;
+    --text: #e8eee8;
+    --muted: #aeb9b0;
+    --shadow: 0 18px 40px rgba(0, 0, 0, .28);
+    --soft-shadow: 0 8px 20px rgba(0, 0, 0, .22);
+    --theme-border: rgba(226, 236, 226, .12);
+}
+
+html[data-theme="dark"] body {
+    background: radial-gradient(circle at 80% 10%, rgba(122, 151, 124, .12), transparent 32%), #202824;
+    color: var(--text);
+}
+
+html[data-theme="dark"] .sidebar {
+    background: linear-gradient(160deg, #303b35, #28322d);
+    box-shadow: 8px 12px 30px rgba(0, 0, 0, .3);
+}
+
+html[data-theme="dark"] .brand-icon,
+html[data-theme="dark"] .admin,
+html[data-theme="dark"] .system-status,
+html[data-theme="dark"] .nav-item:hover {
+    background: rgba(225, 238, 225, .08);
+}
+
+html[data-theme="dark"] .admin-avatar,
+html[data-theme="dark"] .icon-button,
+html[data-theme="dark"] .profile {
+    background: #35413a;
+    color: var(--text);
+}
+
+html[data-theme="dark"] .nav-item { color: #bac8bb; }
+html[data-theme="dark"] .nav-item.active { background: #3b4a3e; color: #eaf2e8; }
+
+html[data-theme="dark"] .topbar h1,
+html[data-theme="dark"] .hero h2,
+html[data-theme="dark"] .hero p,
+html[data-theme="dark"] .page-section-header h2,
+html[data-theme="dark"] .section-header h3,
+html[data-theme="dark"] .building-card h3,
+html[data-theme="dark"] .building-room-header h2,
+html[data-theme="dark"] .timetable-header h3,
+html[data-theme="dark"] .timetable-header h4,
+html[data-theme="dark"] .facility-detail h3,
+html[data-theme="dark"] .facility-section h3,
+html[data-theme="dark"] .sensor-device strong,
+html[data-theme="dark"] .sensor-reading strong,
+html[data-theme="dark"] .settings-control strong,
+html[data-theme="dark"] .settings-system-card h3,
+html[data-theme="dark"] .settings-system-card strong,
+html[data-theme="dark"] .alerts-page-stat strong,
+html[data-theme="dark"] .alert-detail-dialog h2,
+html[data-theme="dark"] .block-summary-heading h3,
+html[data-theme="dark"] .room-name,
+html[data-theme="dark"] .room-occupancy-summary,
+html[data-theme="dark"] .class-info strong,
+html[data-theme="dark"] .equipment-item-text strong {
+    color: var(--text);
+}
+
+html[data-theme="dark"] .topbar p,
+html[data-theme="dark"] .page-section-header p,
+html[data-theme="dark"] .building-card > p,
+html[data-theme="dark"] .building-room-header p,
+html[data-theme="dark"] .class-info span,
+html[data-theme="dark"] .settings-page-header p,
+html[data-theme="dark"] .alert-detail-description,
+html[data-theme="dark"] .alerts-page-header p,
+html[data-theme="dark"] .alert-page-row .alert-text p,
+html[data-theme="dark"] .facility-source-note,
+html[data-theme="dark"] .room-action,
+html[data-theme="dark"] .room-type,
+html[data-theme="dark"] .sensor-device span,
+html[data-theme="dark"] .sensor-reading span,
+html[data-theme="dark"] .sensor-footer,
+html[data-theme="dark"] .sensor-footer > span,
+html[data-theme="dark"] .settings-control small,
+html[data-theme="dark"] .settings-system-card p,
+html[data-theme="dark"] .settings-system-card > div:nth-child(2) span,
+html[data-theme="dark"] .block-operational-item span,
+html[data-theme="dark"] .block-summary-metric > span,
+html[data-theme="dark"] .network-legend,
+html[data-theme="dark"] .data-note,
+html[data-theme="dark"] .coverage-overview p,
+html[data-theme="dark"] .block-summary-metric > small,
+html[data-theme="dark"] .facility-card-subtitle,
+html[data-theme="dark"] .facility-card-caption,
+html[data-theme="dark"] .equipment-item-text span {
+    color: var(--muted);
+}
+
+html[data-theme="dark"] .search,
+html[data-theme="dark"] .search-results,
+html[data-theme="dark"] .backend-status-pill,
+html[data-theme="dark"] .icon-button,
+html[data-theme="dark"] .profile,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .campus-card,
+html[data-theme="dark"] .zone-card,
+html[data-theme="dark"] .alerts-card,
+html[data-theme="dark"] .energy-card,
+html[data-theme="dark"] .health-card,
+html[data-theme="dark"] .energy-stat-card,
+html[data-theme="dark"] .energy-chart-card,
+html[data-theme="dark"] .building-energy-card,
+html[data-theme="dark"] .building-card,
+html[data-theme="dark"] .occupancy-stat-card,
+html[data-theme="dark"] .occupancy-building-card,
+html[data-theme="dark"] .occupancy-zone-card,
+html[data-theme="dark"] .sensor-stat-card,
+html[data-theme="dark"] .sensor-list-card,
+html[data-theme="dark"] .sensor-health-card,
+html[data-theme="dark"] .sensor-types-card,
+html[data-theme="dark"] .alerts-page-stat,
+html[data-theme="dark"] .alerts-page-card,
+html[data-theme="dark"] .settings-card,
+html[data-theme="dark"] .settings-system-card,
+html[data-theme="dark"] .building-room-view,
+html[data-theme="dark"] .building-room-view .room-timetable,
+html[data-theme="dark"] .room-card,
+html[data-theme="dark"] .timetable-row,
+html[data-theme="dark"] .facility-card,
+html[data-theme="dark"] .facility-detail,
+html[data-theme="dark"] .network-overview,
+html[data-theme="dark"] .network-zone-card,
+html[data-theme="dark"] .coverage-overview,
+html[data-theme="dark"] .coverage-building-card,
+html[data-theme="dark"] .facility-sessions,
+html[data-theme="dark"] .facility-session-card,
+html[data-theme="dark"] .room-session-card,
+html[data-theme="dark"] .equipment-item,
+html[data-theme="dark"] .block-occupancy-card,
+html[data-theme="dark"] .block-health-card,
+html[data-theme="dark"] .block-summary-metric,
+html[data-theme="dark"] .analytics-chart-card {
+    background: var(--card) !important;
+    color: var(--text);
+    border-color: var(--theme-border);
+}
+
+html[data-theme="dark"] .search input,
+html[data-theme="dark"] .settings-control select,
+html[data-theme="dark"] .alerts-building-select select,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+    background-color: #35403a;
+    color: var(--text);
+    border-color: var(--theme-border);
+}
+
+html[data-theme="dark"] input::placeholder { color: #9eaaa0; }
+html[data-theme="dark"] .settings-control { border-color: var(--theme-border); }
+html[data-theme="dark"] .sensor-row,
+html[data-theme="dark"] .energy-building,
+html[data-theme="dark"] .zone-occupancy,
+html[data-theme="dark"] .timetable-row,
+html[data-theme="dark"] .block-health-row { border-color: var(--theme-border); }
+
+html[data-theme="dark"] .hero {
+    background: linear-gradient(110deg, #51443c, #463b35);
+}
+
+html[data-theme="dark"] .hero strong { color: #f2c3a9; }
+html[data-theme="dark"] .sensor-type,
+html[data-theme="dark"] .room-occupancy-card,
+html[data-theme="dark"] .facility-session-row,
+html[data-theme="dark"] .block-operational-item {
+    background: #35403a;
+    color: var(--text);
+}
+
+html[data-theme="dark"] .sensor-type strong,
+html[data-theme="dark"] .facility-session-row strong { color: var(--text); }
+html[data-theme="dark"] .sensor-network { background: #35403a; }
+html[data-theme="dark"] .sensor-network > div strong { color: var(--text); }
+html[data-theme="dark"] .sensor-footer { background: rgba(255, 255, 255, .04); }
+html[data-theme="dark"] .search-result { color: var(--text); }
+html[data-theme="dark"] .search-result:hover,
+html[data-theme="dark"] .search-result:focus-visible { background: #3a4840; }
+html[data-theme="dark"] .close-building-view,
+html[data-theme="dark"] .facility-open-button,
+html[data-theme="dark"] .facility-back-button,
+html[data-theme="dark"] .alert-action,
+html[data-theme="dark"] .campus-controls button,
+html[data-theme="dark"] .more-btn,
+html[data-theme="dark"] .dropdown,
+html[data-theme="dark"] .filter-btn { background: #3a453e; color: var(--text); }
+html[data-theme="dark"] .close-building-view:hover,
+html[data-theme="dark"] .alert-action:hover:not(:disabled) { background: #46534b; }
+html[data-theme="dark"] .alert-detail-dialog { background: var(--card); color: var(--text); border-color: var(--theme-border); }
+html[data-theme="dark"] .alert-detail-dialog::backdrop { background: rgba(0, 0, 0, .62); }
+html[data-theme="dark"] .alert-detail-fields dt { color: var(--muted); }
+html[data-theme="dark"] .alert-detail-fields dd { color: var(--text); }
+html[data-theme="dark"] .alert-detail-dialog .secondary-btn { color: #fff; }
+html[data-theme="dark"] .building-info-panel,
+html[data-theme="dark"] .sensor-message,
+html[data-theme="dark"] .campus-info {
+    background: rgba(39, 48, 43, .96);
+    color: var(--text);
+    border-color: var(--theme-border);
+}
+html[data-theme="dark"] .app-toast { background: #26382b; border-color: #537d59; color: #d6f0d4; }
+html[data-theme="dark"] .app-toast.error { background: #402d29; border-color: #915648; color: #f6d5cc; }
+
+html[data-theme="dark"] .alert-status.warning-status,
+html[data-theme="dark"] .facility-status.warning { background: #51462d; color: #f0d78f; }
+html[data-theme="dark"] .alert-status.critical-status,
+html[data-theme="dark"] .facility-status.critical { background: #503530; color: #f3b8a7; }
+html[data-theme="dark"] .alert-status.resolved,
+html[data-theme="dark"] .facility-status.healthy { background: #304a36; color: #b8dbb5; }
+html[data-theme="dark"] .alert-status.info-status { background: #304559; color: #c2daf2; }
+html[data-theme="dark"] .network-health-badge.healthy,
+html[data-theme="dark"] .network-zone-card.healthy .network-zone-status { background: #304a36; color: #b8dbb5; }
+html[data-theme="dark"] .network-health-badge.moderate,
+html[data-theme="dark"] .network-zone-card.moderate .network-zone-status { background: #51462d; color: #f0d78f; }
+html[data-theme="dark"] .network-health-badge.critical,
+html[data-theme="dark"] .network-zone-card.critical .network-zone-status { background: #503530; color: #f3b8a7; }
+html[data-theme="dark"] .settings-toggle { background: #566159; }
+html[data-theme="dark"] .settings-toggle-row input:checked + .settings-toggle { background: #668d6b; }
+html[data-theme="dark"] .settings-feedback { color: #a8d5a7; }
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] .sidebar,
+html[data-theme="dark"] .main,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .building-room-view,
+html[data-theme="dark"] .room-card,
+html[data-theme="dark"] .facility-card,
+html[data-theme="dark"] .settings-card,
+html[data-theme="dark"] .alerts-page-card,
+html[data-theme="dark"] .alert-detail-dialog {
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+
+@media (max-width: 600px) {
+    .alert-detail-actions { align-items: stretch; }
+    .alert-detail-actions > * { flex: 1 1 auto; }
 }

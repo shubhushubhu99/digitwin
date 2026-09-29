@@ -124,9 +124,9 @@ Open your browser at: **[http://localhost:5000](http://localhost:5000)**
 | `GET` | `/api/all-rooms-data` | Complete room timetables hierarchy |
 | `GET` | `/api/energy` | Energy metrics, solar generation, and weekly charts |
 | `GET` | `/api/occupancy` | Occupancy counters and building breakdown |
-| `GET` | `/api/sensors` | Real-time IoT sensor readings and health counts |
+| `GET` | `/api/sensors` | Supported IoT sensor readings and health counts |
 | `POST` | `/api/sensors/refresh` | Trigger sensor telemetry refresh cycle |
-| `GET` | `/api/alerts` | Active and resolved alert queue |
+| `GET` | `/api/alerts` | Active, resolved, and dismissed alert history |
 | `POST` | `/api/alerts/<id>/dismiss` | Mark an alert as dismissed in MySQL |
 | `POST` | `/api/alerts/<id>/resolve` | Mark an alert as resolved in MySQL |
 | `POST` | `/api/alerts` | Create a new campus alert in MySQL |
@@ -152,7 +152,7 @@ Open your browser at: **[http://localhost:5000](http://localhost:5000)**
    - Selecting a room displays today's class schedule directly from `schedules`.
 
 4. **Live Sensor Monitoring**:
-   - Real-time IoT sensors (Temperature, Occupancy, Energy, Air Quality, Door, Motion, Water Level) synced with MySQL.
+   - Supported sensor types (Temperature, Occupancy, Energy, Air Quality, Door, Humidity) synced with MySQL.
    - Clicking **"Live Data ▾"** triggers sensor telemetry refresh and updates MySQL timestamps.
 
 5. **Campus Alerts**:
@@ -162,3 +162,4 @@ Open your browser at: **[http://localhost:5000](http://localhost:5000)**
 6. **Dashboard Settings**:
    - Settings (refresh interval, live data toggle, density, default landing page) loaded from MySQL.
    - Clicking **"Save Settings"** persists configurations directly to the MySQL `dashboard_settings` table.
+   - Dark Mode applies immediately and persists in this browser, with optional MySQL synchronization.

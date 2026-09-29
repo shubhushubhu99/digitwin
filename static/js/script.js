@@ -217,6 +217,18 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: null, title: "Occupancy Spike", severity: "warning", status: "active", category: "Occupancy sensor", location: "Library · Ground Floor", description: "Zone occupancy reached 94% of safe capacity.", created_at: "Today, 08:35 AM" },
         { id: null, title: "Routine Sensor Maintenance", severity: "resolved", status: "resolved", category: "Maintenance", location: "Block 1 · Floor 2", description: "Temperature calibration completed successfully.", created_at: "Today, 07:12 AM" }
     ];
+    const demoAlertStorageKey = "campusDemoAlertStates";
+    try {
+        const savedStates = JSON.parse(localStorage.getItem(demoAlertStorageKey) || "[]");
+        if (Array.isArray(savedStates)) {
+            alertRecords = alertRecords.map(alert => {
+                const saved = savedStates.find(state => state.title === alert.title);
+                return saved ? { ...alert, status: saved.status, severity: saved.severity || alert.severity } : alert;
+            });
+        }
+    } catch (error) {
+        console.warn("Could not restore saved demo alert states:", error);
+    }
 
 
     /* =====================================================
@@ -1599,7 +1611,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.querySelector("#dashboard-search").value = "";
                 document.querySelector("#alerts-building-filter").value = "all";
                 closeSearchResults();
-                document.querySelector('.alert-filter[data-alert-filter="active"]')?.click();
+                resetAlertFilters("active");
             }
         };
         card.addEventListener("click", openView);
@@ -1625,7 +1637,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const buildingFilter = document.querySelector("#alerts-building-filter");
         if (buildingFilter) buildingFilter.value = "all";
         closeSearchResults();
-        document.querySelector('.alert-filter[data-alert-filter="all"]')?.click();
+        resetAlertFilters("all");
     };
     document.querySelector("#see-all-alerts")?.addEventListener("click", showFullAlertList);
     document.querySelector("#notifications-button")?.addEventListener("click", showFullAlertList);
@@ -1659,7 +1671,8 @@ document.addEventListener("DOMContentLoaded", () => {
         { name: "Occupancy Sensor", location: "Library · Floor 1", code: "SNS-OCC-102" },
         { name: "Energy Sensor", location: "Block 1", code: "SNS-PWR-103" },
         { name: "Air Quality Sensor", location: "Science Lab · Floor 2", code: "SNS-AQI-104" },
-        { name: "Motion Sensor", location: "Block 6 · Corridor", code: "SNS-MOT-106" }
+        { name: "Door Sensor", location: "Admin Block · Main Entry", code: "SNS-DOR-105" },
+        { name: "Humidity Sensor", location: "Block 2 · Room 201", code: "SNS-HUM-108" }
     ];
 
     function closeSearchResults() {
@@ -1901,16 +1914,58 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
+    let alertStatusFilter = "all";
+    const alertSeverityFilters = new Set();
+    let currentAlertDetails = null;
+    let toastTimeout = null;
+
+
+    function showToast(message, kind = "success") {
+        let toast = document.querySelector("#app-toast");
+        if (!toast) {
+            toast = document.createElement("div");
+            toast.id = "app-toast";
+            toast.className = "app-toast";
+            toast.setAttribute("role", "status");
+            toast.setAttribute("aria-live", "polite");
+            document.body.append(toast);
+        }
+        toast.className = `app-toast ${kind}`;
+        toast.textContent = message;
+        toast.hidden = false;
+        window.clearTimeout(toastTimeout);
+        toastTimeout = window.setTimeout(() => { toast.hidden = true; }, 3200);
+    }
+
+
+    function persistDemoAlertStates() {
+        try {
+            const states = alertRecords.filter(alert => !alert.id).map(alert => ({
+                title: alert.title,
+                severity: alert.severity,
+                status: alert.status
+            }));
+            localStorage.setItem(demoAlertStorageKey, JSON.stringify(states));
+            return true;
+        } catch (error) {
+            console.error("Could not persist demo alert status:", error);
+            return false;
+        }
+    }
+
+
     function getActiveAlertFilter() {
-        return document.querySelector(".alert-filter.active")?.dataset.alertFilter || "all";
+        return alertStatusFilter;
     }
 
     function updateAlertStats() {
         const notDismissed = alertRecords.filter(alert => alert.status !== "dismissed");
+        const active = alertRecords.filter(alert => alert.status === "active");
         const counts = {
             "#alerts-total": notDismissed.length,
-            "#alerts-critical": notDismissed.filter(alert => alert.severity === "critical").length,
-            "#alerts-warning": notDismissed.filter(alert => alert.severity === "warning").length,
+            "#alerts-critical": active.filter(alert => alert.severity === "critical").length,
+            "#alerts-warning": active.filter(alert => alert.severity === "warning").length,
+            "#alerts-info": active.filter(alert => alert.severity === "info").length,
             "#alerts-resolved": alertRecords.filter(alert => alert.status === "resolved").length
         };
         Object.entries(counts).forEach(([selector, count]) => {
@@ -1924,7 +1979,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .some(row => !row.hidden);
         }
         const issueCount = document.querySelector("#stat-active-issues");
-        const activeCount = alertRecords.filter(alert => alert.status === "active").length;
+        const activeCount = active.length;
         if (issueCount) issueCount.textContent = activeCount;
         const notificationCount = document.querySelector("#notifications-button b");
         if (notificationCount) notificationCount.textContent = activeCount;
@@ -1939,6 +1994,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function showAlertDetails(alert) {
         if (!alert) return;
+        currentAlertDetails = alert;
         const fields = {
             "#alert-detail-title": alert.title || "Campus alert",
             "#alert-detail-state": (alert.status || "active").replace(/^./, char => char.toUpperCase()),
@@ -1957,9 +2013,21 @@ document.addEventListener("DOMContentLoaded", () => {
             severity.textContent = level.replace(/^./, char => char.toUpperCase());
             severity.className = `alert-status ${level === "resolved" ? "resolved" : `${level}-status`}`;
         }
+        const canUpdate = alert.status === "active";
+        const resolveButton = document.querySelector("#alert-detail-resolve");
+        const dismissButton = document.querySelector("#alert-detail-dismiss");
+        if (resolveButton) resolveButton.hidden = !canUpdate;
+        if (dismissButton) dismissButton.hidden = !canUpdate;
         const dialog = document.querySelector("#alert-detail-dialog");
         if (dialog && !dialog.open) dialog.showModal();
     }
+
+    document.querySelector("#alert-detail-resolve")?.addEventListener("click", () => {
+        if (currentAlertDetails) updateAlert(currentAlertDetails, "resolved");
+    });
+    document.querySelector("#alert-detail-dismiss")?.addEventListener("click", () => {
+        if (currentAlertDetails) updateAlert(currentAlertDetails, "dismissed");
+    });
 
     function renderAlertsList() {
         const list = document.querySelector("#alerts-list");
@@ -1983,7 +2051,7 @@ document.addEventListener("DOMContentLoaded", () => {
             article.querySelector(".alert-text small").textContent = `${alert.location || "Campus"} · ${alert.category || "System"} · ${formatAlertTime(alert.created_at)}${alert.id ? " · MySQL" : " · Demo data"}`;
             article.querySelector(".alert-text p").textContent = alert.description || "No additional details are available.";
             const badge = article.querySelector(".alert-status");
-            badge.textContent = status === "resolved" ? "Resolved" : severity.replace(/^./, char => char.toUpperCase());
+            badge.textContent = status === "active" ? severity.replace(/^./, char => char.toUpperCase()) : status.replace(/^./, char => char.toUpperCase());
             badge.classList.add(status === "resolved" ? "resolved" : `${severity}-status`);
             article.querySelector(".dismiss-alert").hidden = status !== "active";
             article.querySelector(".resolve-alert").hidden = status !== "active";
@@ -2025,43 +2093,83 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function updateAlert(alert, newStatus) {
-        if (alert.id) {
+        if (!alert || alert.status !== "active" || !["resolved", "dismissed"].includes(newStatus)) return;
+        if (alert.id !== null && alert.id !== undefined) {
             try {
                 const response = await fetch(`${API_BASE}/api/alerts/${alert.id}/${newStatus === "resolved" ? "resolve" : "dismiss"}`, { method: "POST" });
-                if (!response.ok) throw new Error("Could not update the alert in MySQL.");
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || "Could not update the alert in MySQL.");
             } catch (error) {
-                if (alertsLastUpdated) alertsLastUpdated.textContent = "Alert update failed; database unavailable";
+                console.error("Alert status update failed:", error);
+                showToast(error.message || "Alert status could not be saved.", "error");
                 return;
             }
         }
+        const previousStatus = alert.status;
+        const previousSeverity = alert.severity;
         alert.status = newStatus;
-        if (newStatus === "resolved") alert.severity = "resolved";
+        if (!alert.id && !persistDemoAlertStates()) {
+            alert.status = previousStatus;
+            alert.severity = previousSeverity;
+            showToast("Alert status could not be saved in this browser.", "error");
+            return;
+        }
         renderAlertsList();
         updateAlertStats();
+        if (document.querySelector("#alert-detail-dialog")?.open && currentAlertDetails === alert) showAlertDetails(alert);
+        showToast(newStatus === "resolved" ? "Alert marked as resolved." : "Alert dismissed.");
     }
 
-    function filterAlerts(filter = "all") {
+    function filterAlerts(statusFilter) {
+        if (statusFilter && ["all", "active", "resolved", "dismissed"].includes(statusFilter)) {
+            alertStatusFilter = statusFilter;
+            document.querySelectorAll('.alert-filter[data-filter-group="status"]').forEach(button => {
+                button.classList.toggle("active", button.dataset.alertFilter === alertStatusFilter);
+            });
+        }
         const rows = [...document.querySelectorAll("#alerts-list .alert-page-row")];
         const searchTerm = alertSearch?.value.trim().toLowerCase() || "";
         const building = document.querySelector("#alerts-building-filter")?.value || "all";
+        const selectedSeverities = [...alertSeverityFilters];
         rows.forEach(row => {
-            const matchesFilter = filter === "all" || row.dataset.severity === filter || row.dataset.status === filter;
+            const matchesStatus = alertStatusFilter === "all" || row.dataset.status === alertStatusFilter;
+            const matchesSeverity = selectedSeverities.length === 0 || selectedSeverities.includes(row.dataset.severity);
             const matchesSearch = !searchTerm || row.textContent.toLowerCase().includes(searchTerm);
             const matchesBuilding = building === "all" || row.querySelector(".alert-text small")?.textContent.toLowerCase().includes(building);
-            row.hidden = !(matchesFilter && matchesSearch && matchesBuilding);
+            row.hidden = !(matchesStatus && matchesSeverity && matchesSearch && matchesBuilding);
         });
         updateAlertStats();
     }
 
+    function resetAlertFilters(status = "all") {
+        alertStatusFilter = status;
+        alertSeverityFilters.clear();
+        document.querySelectorAll('.alert-filter[data-filter-group="status"]').forEach(button => {
+            button.classList.toggle("active", button.dataset.alertFilter === status);
+        });
+        document.querySelectorAll('.alert-filter[data-filter-group="severity"]').forEach(button => button.classList.remove("active"));
+        filterAlerts();
+    }
+
     alertFilters.forEach(button => button.addEventListener("click", () => {
-        alertFilters.forEach(item => item.classList.toggle("active", item === button));
-        filterAlerts(button.dataset.alertFilter);
+        if (button.dataset.filterGroup === "severity") {
+            const severity = button.dataset.alertFilter;
+            if (alertSeverityFilters.has(severity)) alertSeverityFilters.delete(severity);
+            else alertSeverityFilters.add(severity);
+            button.classList.toggle("active", alertSeverityFilters.has(severity));
+        } else {
+            alertStatusFilter = button.dataset.alertFilter;
+            document.querySelectorAll('.alert-filter[data-filter-group="status"]').forEach(item => {
+                item.classList.toggle("active", item === button);
+            });
+        }
+        filterAlerts();
     }));
 
     alertSearch?.addEventListener("input", () => {
-        if (alertsSection?.classList.contains("active-section")) filterAlerts(getActiveAlertFilter());
+        if (alertsSection?.classList.contains("active-section")) filterAlerts();
     });
-    document.querySelector("#alerts-building-filter")?.addEventListener("change", () => filterAlerts(getActiveAlertFilter()));
+    document.querySelector("#alerts-building-filter")?.addEventListener("change", () => filterAlerts());
 
     document.querySelector("#alert-detail-back")?.addEventListener("click", () => document.querySelector("#alert-detail-dialog")?.close());
     document.querySelector("#alert-detail-list")?.addEventListener("click", () => {
@@ -2146,6 +2254,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         density: "comfortable",
 
+        darkMode: false,
+
         systemStatus: true,
 
         timestamps: true
@@ -2207,6 +2317,11 @@ document.addEventListener("DOMContentLoaded", () => {
         density:
             document.querySelector(
                 "#settings-density"
+            ),
+
+        darkMode:
+            document.querySelector(
+                "#settings-dark-mode"
             ),
 
         systemStatus:
@@ -2311,6 +2426,10 @@ document.addEventListener("DOMContentLoaded", () => {
             !settings.timestamps
         );
 
+        const darkMode = Boolean(settings.darkMode);
+        document.documentElement.dataset.theme = darkMode ? "dark" : "light";
+        document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
+
     }
 
 
@@ -2354,6 +2473,19 @@ document.addEventListener("DOMContentLoaded", () => {
             feedback.textContent =
                 message;
 
+    }
+
+
+    async function syncSettingsToBackend(settings) {
+        if (typeof API_BASE === "undefined" || !backendConnected) return false;
+        const response = await fetch(`${API_BASE}/api/settings`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(settings)
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "Settings could not be saved.");
+        return true;
     }
 
 
@@ -2403,22 +2535,14 @@ document.addEventListener("DOMContentLoaded", () => {
             "Settings saved successfully."
         );
 
-        if (typeof API_BASE !== "undefined") {
-            fetch(`${API_BASE}/api/settings`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(settings)
+        syncSettingsToBackend(settings)
+            .then(saved => {
+                if (saved) showSettingsFeedback("Settings saved to MySQL successfully.");
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showSettingsFeedback("Settings saved to MySQL successfully.");
-                }
-            })
-            .catch(err => {
-                console.warn("Could not save settings to MySQL:", err);
+            .catch(error => {
+                console.warn("Could not save settings to MySQL:", error);
+                showSettingsFeedback("Settings saved in this browser; MySQL sync failed.");
             });
-        }
 
     }
 
@@ -2431,6 +2555,15 @@ document.addEventListener("DOMContentLoaded", () => {
         storedSettings
     );
 
+    settingsControls.darkMode?.addEventListener("change", () => {
+        const settings = { ...getStoredSettings(), darkMode: settingsControls.darkMode.checked };
+        localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
+        applySettings(settings);
+        showSettingsFeedback(settings.darkMode ? "Dark Mode enabled." : "Dark Mode disabled.");
+        syncSettingsToBackend({ darkMode: settings.darkMode }).catch(error => {
+            console.warn("Could not save appearance preference to MySQL:", error);
+        });
+    });
 
     if (
         !window.location.hash &&
@@ -2480,6 +2613,9 @@ document.addEventListener("DOMContentLoaded", () => {
             applySettings(
                 settingsDefaults
             );
+
+            syncSettingsToBackend(settingsDefaults)
+                .catch(error => console.warn("Could not restore MySQL settings:", error));
 
 
             showSettingsFeedback(
@@ -4435,7 +4571,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch(`${API_BASE}/api/sensors`);
             const data = await res.json();
             if (!data.success) return;
-            sensorRecords = Array.isArray(data.sensors) ? data.sensors : [];
+            const sensors = Array.isArray(data.sensors) ? data.sensors : [];
+            sensorRecords = sensors;
 
             // Update sensor stats counters
             if (data.counts) {
@@ -4448,8 +4585,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (activeEl && data.counts.active !== undefined) activeEl.textContent = data.counts.active;
                 if (warnEl && data.counts.warning !== undefined) warnEl.textContent = data.counts.warning;
                 if (offEl && data.counts.offline !== undefined) offEl.textContent = data.counts.offline;
+                const healthEl = document.querySelector(".sensor-health-circle strong");
+                if (healthEl) healthEl.textContent = `${data.counts.health_percent ?? (data.counts.total ? Math.round(data.counts.active / data.counts.total * 100) : 0)}%`;
+                const healthCounts = {
+                    "#sensor-health-active": data.counts.active,
+                    "#sensor-health-warning": data.counts.warning,
+                    "#sensor-health-offline": data.counts.offline
+                };
+                Object.entries(healthCounts).forEach(([selector, count]) => {
+                    const element = document.querySelector(selector);
+                    if (element && count !== undefined) element.textContent = count;
+                });
             }
-            searchSensors = data.sensors.map(sensor => ({
+            searchSensors = sensors.map(sensor => ({
                 name: sensor.name,
                 location: sensor.location || sensor.building_name || "Campus",
                 code: sensor.sensor_code
@@ -4458,12 +4606,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Update sensor list rows
             const sensorCard = document.querySelector("#sensors-section .sensor-list-card");
-            if (sensorCard && data.sensors && data.sensors.length > 0) {
+            if (sensorCard) {
                 // Remove existing sensor rows
                 sensorCard.querySelectorAll(".sensor-row").forEach(r => r.remove());
 
                 // Append new dynamic rows from MySQL
-                data.sensors.forEach(s => {
+                sensors.forEach(s => {
                     const row = document.createElement("div");
                     row.className = "sensor-row";
                     row.tabIndex = 0;
@@ -4524,9 +4672,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch(`${API_BASE}/api/settings`);
             const data = await res.json();
             if (data.success && data.settings) {
-                applySettings(data.settings);
+                const settings = { ...getStoredSettings(), ...data.settings };
+                localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
+                applySettings(settings);
                 // Also update controls
-                Object.entries(data.settings).forEach(([key, val]) => {
+                Object.entries(settings).forEach(([key, val]) => {
                     const ctrl = settingsControls[key];
                     if (ctrl) {
                         if (ctrl.type === "checkbox") {
