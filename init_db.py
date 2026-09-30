@@ -429,8 +429,6 @@ def init_database():
             ("SNS-PWR-103", "Energy Sensor", "energy", "Block 1", "Block 1", "18.6", "kW", "warning", "yellow", "ϟ"),
             ("SNS-AQI-104", "Air Quality Sensor", "air_quality", "Science Lab", "Science Lab · Floor 2", "Good", "AQI", "active", "blue", "◌"),
             ("SNS-DOR-105", "Door Sensor", "door", "Admin Block", "Admin Block · Main Entry", "Closed", "", "active", "peach", "▣"),
-            ("SNS-MOT-106", "Motion Sensor", "motion", "Sports Centre", "Sports Centre · Hall A", "No motion", "", "offline", "red", "⌁"),
-            ("SNS-WTR-107", "Water Level Sensor", "water", "Utility Building", "Utility Building", "79", "%", "active", "blue", "▰"),
             ("SNS-HUM-108", "Humidity Sensor", "humidity", "Block 2", "Block 2 · Room 201", "48", "%", "active", "green", "💧"),
         ]
 
@@ -476,6 +474,7 @@ def init_database():
             ("sensorHealth", "true"),
             ("offlineAlerts", "true"),
             ("density", "comfortable"),
+            ("darkMode", "false"),
             ("systemStatus", "true"),
             ("timestamps", "true")
         ]

@@ -6,7 +6,7 @@
 
     <title>Campus Digital Twin</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='20260929.1') }}">
 
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
@@ -772,7 +772,7 @@
 
             <!-- ENERGY -->
 
-            <div class="energy-card">
+            <div class="energy-card" id="overview-energy-card" role="button" tabindex="0" aria-label="Open energy dashboard">
 
                 <div class="section-header">
 
@@ -834,7 +834,7 @@
 
             <!-- SYSTEM HEALTH -->
 
-            <div class="health-card">
+            <div class="health-card" id="overview-health-card" role="button" tabindex="0" data-dashboard-view="analytics" aria-label="Open campus analytics">
 
                 <div class="health-circle">
 
@@ -2494,7 +2494,7 @@
             <div class="sensor-top-grid">
 
 
-                <div class="sensor-stat-card">
+                <div class="sensor-stat-card" data-sensor-status="all" role="button" tabindex="0">
 
                     <div class="sensor-stat-icon">
                         ⌁
@@ -2507,7 +2507,7 @@
                         </span>
 
                         <strong id="sensor-stat-total">
-                            248
+                            6
                         </strong>
 
                         <small>
@@ -2520,7 +2520,7 @@
 
 
 
-                <div class="sensor-stat-card">
+                <div class="sensor-stat-card" data-sensor-status="active" role="button" tabindex="0">
 
                     <div class="sensor-stat-icon green">
                         ✓
@@ -2533,7 +2533,7 @@
                         </span>
 
                         <strong id="sensor-stat-active">
-                            231
+                            5
                         </strong>
 
                         <small>
@@ -2546,7 +2546,7 @@
 
 
 
-                <div class="sensor-stat-card">
+                <div class="sensor-stat-card" data-sensor-status="warning" role="button" tabindex="0">
 
                     <div class="sensor-stat-icon yellow">
                         !
@@ -2559,7 +2559,7 @@
                         </span>
 
                         <strong id="sensor-stat-warning">
-                            11
+                            1
                         </strong>
 
                         <small>
@@ -2572,7 +2572,7 @@
 
 
 
-                <div class="sensor-stat-card">
+                <div class="sensor-stat-card" data-sensor-status="offline" role="button" tabindex="0">
 
                     <div class="sensor-stat-icon red">
                         ×
@@ -2585,7 +2585,7 @@
                         </span>
 
                         <strong id="sensor-stat-offline">
-                            6
+                            0
                         </strong>
 
                         <small>
@@ -2833,17 +2833,17 @@
                     >
 
                         <div class="sensor-device-icon green">
-                            ⌁
+                            %
                         </div>
 
                         <div class="sensor-device">
 
                             <strong>
-                                Motion Sensor
+                                Humidity Sensor
                             </strong>
 
                             <span>
-                                Sports Centre · Hall A
+                                Block 2 · Room 201
                             </span>
 
                         </div>
@@ -2851,48 +2851,7 @@
                         <div class="sensor-reading">
 
                             <strong>
-                                No motion
-                            </strong>
-
-                            <span>
-                                3 min ago
-                            </span>
-
-                        </div>
-
-                        <span class="sensor-status offline">
-                            Offline
-                        </span>
-
-                    </div>
-
-
-
-                    <div
-                        class="sensor-row"
-                        tabindex="0"
-                    >
-
-                        <div class="sensor-device-icon blue">
-                            ▰
-                        </div>
-
-                        <div class="sensor-device">
-
-                            <strong>
-                                Water Level Sensor
-                            </strong>
-
-                            <span>
-                                Utility Building
-                            </span>
-
-                        </div>
-
-                        <div class="sensor-reading">
-
-                            <strong>
-                                79%
+                                48%
                             </strong>
 
                             <span>
@@ -2906,6 +2865,8 @@
                         </span>
 
                     </div>
+
+
 
                 </div>
 
@@ -2935,7 +2896,7 @@
                         <div>
 
                             <strong>
-                                93%
+                                83%
                             </strong>
 
                             <span>
@@ -2954,7 +2915,7 @@
                             <span class="health-dot active-dot"></span>
 
                             <p>
-                                <strong>231</strong> Active
+                                <strong id="sensor-health-active">5</strong> Active
                             </p>
 
                         </div>
@@ -2965,7 +2926,7 @@
                             <span class="health-dot warning-dot"></span>
 
                             <p>
-                                <strong>11</strong> Warning
+                                <strong id="sensor-health-warning">1</strong> Warning
                             </p>
 
                         </div>
@@ -2976,7 +2937,7 @@
                             <span class="health-dot offline-dot"></span>
 
                             <p>
-                                <strong>6</strong> Offline
+                                <strong id="sensor-health-offline">0</strong> Offline
                             </p>
 
                         </div>
@@ -3124,7 +3085,7 @@
                         <div>
 
                             <strong>
-                                Door / Motion
+                                Door / Access Control
                             </strong>
 
                             <span>
@@ -3145,11 +3106,11 @@
                         <div>
 
                             <strong>
-                                Water Level
+                                Humidity
                             </strong>
 
                             <span>
-                                Utilities
+                                Environment
                             </span>
 
                         </div>
@@ -3270,6 +3231,17 @@
                 </div>
 
 
+                <div class="alerts-page-stat info">
+
+                    <span>Info Alerts</span>
+
+                    <strong id="alerts-info">0</strong>
+
+                    <small>Active informational events</small>
+
+                </div>
+
+
                 <div class="alerts-page-stat resolved">
 
                     <span>
@@ -3302,6 +3274,7 @@
                         class="alert-filter active"
                         type="button"
                         data-alert-filter="all"
+                        data-filter-group="status"
                     >
                         All
                     </button>
@@ -3310,6 +3283,7 @@
                         class="alert-filter"
                         type="button"
                         data-alert-filter="critical"
+                        data-filter-group="severity"
                     >
                         Critical
                     </button>
@@ -3318,6 +3292,7 @@
                         class="alert-filter"
                         type="button"
                         data-alert-filter="warning"
+                        data-filter-group="severity"
                     >
                         Warning
                     </button>
@@ -3325,7 +3300,17 @@
                     <button
                         class="alert-filter"
                         type="button"
+                        data-alert-filter="info"
+                        data-filter-group="severity"
+                    >
+                        Info
+                    </button>
+
+                    <button
+                        class="alert-filter"
+                        type="button"
                         data-alert-filter="resolved"
+                        data-filter-group="status"
                     >
                         Resolved
                     </button>
@@ -3334,6 +3319,7 @@
                         class="alert-filter"
                         type="button"
                         data-alert-filter="active"
+                        data-filter-group="status"
                     >
                         Active
                     </button>
@@ -3342,6 +3328,7 @@
                         class="alert-filter"
                         type="button"
                         data-alert-filter="dismissed"
+                        data-filter-group="status"
                     >
                         Dismissed
                     </button>
@@ -3498,15 +3485,15 @@
                         <div class="alert-text">
 
                             <strong>
-                                Sensor Offline
+                                Air Quality Sensor Check
                             </strong>
 
                             <small>
-                                Block 6, Corridor · Warning · Active · Today, 08:35 AM
+                                Science Lab · Warning · Active · Today, 08:35 AM
                             </small>
 
                             <p>
-                                Motion sensor is currently offline.
+                                Air quality reading is delayed; checking interval.
                             </p>
 
                         </div>
@@ -3539,15 +3526,15 @@
                         <div class="alert-text">
 
                             <strong>
-                                Water Level Normalized
+                                Door Access Restored
                             </strong>
 
                             <small>
-                                Block 7 · Resolved · Today, 07:12 AM
+                                Admin Block · Resolved · Today, 07:12 AM
                             </small>
 
                             <p>
-                                Water level has returned to the normal range.
+                                Door access synchronization completed successfully.
                             </p>
 
                         </div>
@@ -3673,7 +3660,6 @@
                         </select>
 
                     </label>
-
 
 
                     <label class="settings-control settings-toggle-row">
@@ -3992,6 +3978,16 @@
                     </label>
 
 
+                    <label class="settings-control settings-toggle-row">
+                        <span>
+                            <strong>Dark Mode</strong>
+                            <small>Apply the dark appearance across the campus dashboard.</small>
+                        </span>
+                        <input id="settings-dark-mode" type="checkbox">
+                        <span class="settings-toggle"></span>
+                    </label>
+
+
 
                     <label class="settings-control settings-toggle-row">
 
@@ -4202,7 +4198,11 @@
                 <div><dt>Source</dt><dd id="alert-detail-source">Monitoring system</dd></div>
                 <div><dt>Time</dt><dd id="alert-detail-time">Not provided</dd></div>
             </dl>
-            <button class="secondary-btn" id="alert-detail-list" type="button">Back to Alerts</button>
+            <div class="alert-detail-actions">
+                <button class="alert-action resolve-alert" id="alert-detail-resolve" type="button">Resolve</button>
+                <button class="alert-action dismiss-alert" id="alert-detail-dismiss" type="button">Dismiss</button>
+                <button class="secondary-btn" id="alert-detail-list" type="button">Back to Alerts</button>
+            </div>
         </dialog>
 
     </main>
@@ -4213,7 +4213,7 @@
 
 <!-- ================= JAVASCRIPT ================= -->
 
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/script.js', v='20260929.1') }}"></script>
 
 </body>
 </html>
